@@ -1,118 +1,79 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import { collection, addDoc, getDocs, onSnapshot, query } from 'firebase/firestore';
+import { db } from "@/components/middleware/firebaseConfig";
+import Input from '@/components/components/input';
+import { useEffect, useState } from 'react';
+import Todo from '@/components/components/todo';
+import Search from '@/components/components/search';
+import { Col, Container, ListGroup, Row } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-const inter = Inter({ subsets: ['latin'] })
+const dbInstance = collection(db, 'tasks');
 
-export default function Home() {
+export default function Home({productArray}) {
+  const [todolist, settodolist] = useState([]);
+  const [searchInput, setsearchInput] = useState("");
+  const [filteredtodo, setfilteredtodo] = useState([]);
+  // const gettodo = async() =>{
+  //   let data = await getDocs(dbInstance)
+  //   let products = data.docs.map((item) => { return { ...item.data(), id: item.id } });
+  //   settodolist([...products]);
+  // }
+  
+  
+  useEffect(()=>{
+    //  settodolist(productArray);
+    // gettodo();
+    
+    const q = query(dbInstance);
+    const ndata = onSnapshot(q,(querySnapshot)=>{
+    settodolist(querySnapshot.docs.map(doc=>({...doc.data(),id:doc.id})))
+    });
+  },[])
+
+
+  useEffect(()=>{
+    let filter = [...todolist];
+    filter = filter.filter((el)=>{
+      console.log(el);
+      let item = el.Name.toLowerCase();
+      return item.includes(searchInput.toLowerCase());
+    });
+    // console.log(...filter);
+    setfilteredtodo([...filter]);
+  },[todolist,searchInput]);
+
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">pages/index.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+   <div className='App h-screen mx-auto bg-slate-200'>
+        <h1 style={{textDecoration:"underline"}} className='text-center m-5 mt-0 text-4xl font-medium leading-tight text-primary'>
+          <div className='pt-5 font-weight-bold'>To-do App</div>
+          </h1>     
+          <Container>
+          <Row className='mb-5'>
+            <Col xs={6} className='items-right'>
+              <div className='' ><Input/></div>
+            </Col>
+            <Col xs={6} className='items-right'>
+               <div className=''><Search searchInput={searchInput} setsearchInput={setsearchInput}/></div>
+            </Col>
+          </Row>
+          <ListGroup>
+          {filteredtodo.map((item)=>(
+            <ListGroup.Item key={item.id}>
+                <Todo Item={item}/>
+            </ListGroup.Item>
+             )
+            )}
+          </ListGroup>
+        </Container> 
+   </div>
   )
 }
+
+// export async function getServerSideProps(context) {
+//   let data = await getDocs(dbInstance)
+//   let products = data.docs.map((item) => { return { ...item.data(), id: item.id } });
+//   console.log(products);
+//   return {
+//     props: { productArray: JSON.parse(JSON.stringify(products)) }
+//   }
+// }
